@@ -36,8 +36,8 @@ void parse(char *buf, char **args)
 void execute(char **args, char **path)
 { 
 	int pid, status;
+	int n = -1;
 	if (path == NULL){
-		int n = -1;
 		n = strcmp(args[0],"path");
 		n = strcmp(args[0],"exit");
 		if ( n != 0){
@@ -46,6 +46,8 @@ st.\n");
 			return;
 		}
 	}
+	if ( n == 0)
+		exit(0);
 	if ((pid = fork()) < 0) {
 		perror("fork");
 	}
