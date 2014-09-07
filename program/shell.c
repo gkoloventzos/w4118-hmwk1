@@ -13,7 +13,7 @@ int main()
 	char buf[2048]; char *args[128];
 	char **path = NULL;
 	for (;;) {
-		printf("$");
+		printf("$ ");
 		if (fgets(buf, sizeof(buf), stdin) == NULL) {
 			printf("\n"); exit(0); }
 			parse(buf, args);
@@ -39,16 +39,17 @@ void execute(char **args, char ***path)
 	int pid, status;
 	int n = -1;
 	int l = -1;
-	if (path == NULL){
-		n = strcmp(args[0],"path");
-		l = strcmp(args[0],"exit");
+	n = strcmp(args[0],"path");
+	l = strcmp(args[0],"exit");
+	if ((*path) == NULL){
 		if (n != 0 && l != 0){
 			printf("Error: path is null\nPlease add some path fir\
 st.\n");
 			return;
 		}
 	}
-	if (l == 0)
+	if (l == 0){
+		//free path
 		exit(0);
 	}
 	if (n == 0){
