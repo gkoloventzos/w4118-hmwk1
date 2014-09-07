@@ -4,7 +4,7 @@
 CC = gcc -Wall
 SRCS = shell.c
 OBJS = $(SRCS:.c=.o)
-PROG = shell
+PROG = w4118_sh
 
 objs : $(SRCS)
 	$(CC) -c $(SRCS)
