@@ -5,7 +5,7 @@
 #include <sys/wait.h>
 void parse(char *buf, char **args);
 void execute(char **args, char ** path);
-
+void mypath(char **args, char ** path);
 
 int main()
 { 
@@ -58,4 +58,32 @@ st.\n");
 	if (wait(&status) != pid) {
 		perror("wait");
 	} 
+}
+
+void mypath(char **args, char **path){
+
+	char *path_new;
+	char *ppath = NULL;
+	int i;
+	size_t len;
+	if (args[1] == NULL){
+		if (path == NULL)
+			return;
+		path_new=path[0];
+		for(i=0; path_new != NULL; i++){
+		printf("here\n");
+			path_new = path[i];
+			ppath = realloc(ppath,strlen(path_new)+1);
+			len = strlen(ppath);
+			ppath[len]=":";
+		}
+		if (ppath != NULL){
+			len = strlen(ppath);
+                	ppath[len]="\0";
+		}
+		printf("before print\n");
+		printf("PATH=%s",ppath);
+		return;
+	}
+	
 }
