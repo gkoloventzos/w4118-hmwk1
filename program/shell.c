@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/wait.h>
 void parse(char *buf, char **args);
 void execute(char **args);
-main()
+int main()
 { 
 	char buf[1024]; char *args[64];
 	for (;;) {
@@ -13,15 +14,15 @@ main()
 			parse(buf, args);
 			execute(args); 
 	}
+	return 0;
 }
 void parse(char *buf, char **args)
 { 
-	while (*buf != ’\0’) {
-		while ((*buf == ’ ’) || (*buf == ’\t’) || (*buf == ’\n’))
-			*buf++ = ’\0’;
+	while (*buf != '\0') {
+		while ((*buf == ' ') || (*buf == '\t') || (*buf == '\n'))
+			*buf++ = '\0';
 		*args++ = buf;
-		while ((*buf != ’\0’) && (*buf != ’ ’) &&
-		(*buf != ’\t’) && (*buf != ’\n’))
+		while ((*buf != '\0') && (*buf != ' ') && (*buf != '\t') && (*buf != '\n'))
 			buf++; }
 		*--args = NULL; 
 }
