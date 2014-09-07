@@ -37,17 +37,22 @@ void execute(char **args, char **path)
 { 
 	int pid, status;
 	int n = -1;
+	int l = -1;
 	if (path == NULL){
 		n = strcmp(args[0],"path");
-		n = strcmp(args[0],"exit");
-		if ( n != 0){
+		l = strcmp(args[0],"exit");
+		if (n != 0 && l != 0){
 			printf("Error: path is null\nPlease add some path fir\
 st.\n");
 			return;
 		}
 	}
-	if ( n == 0)
+	if (l == 0)
 		exit(0);
+	if (n == 0){
+		mypath(args, path);
+		return;
+	}
 	if ((pid = fork()) < 0) {
 		perror("fork");
 	}
