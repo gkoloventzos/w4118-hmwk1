@@ -80,7 +80,7 @@ void mypath(char **args, char ***path, int *leng){
 	int i,z,path_length;
 	size_t len;
 	if (args[1] == NULL){
-		if ((*path) == NULL){
+		if ((*leng) == 0){
 			return;}
         path_length = *leng;
         path_length--;
@@ -130,10 +130,25 @@ void mypath(char **args, char ***path, int *leng){
 		return;
 	}	
 	if (strncmp(args[1],"-",1) == 0){
+        int find = -1;
+        int f;
+        for (f = 0; f <(*leng); f++){
+            if (strcmp(args[2],(*path)[f]) == 0){
+                find =f;
+                if (f == (*leng) -1){
+                    free((*path)[f]);
+                    (*leng)--;
+                }
+            }
+        }
+        if (find == -1){
+            printf("Path: %s is not added.\n",args[2]);
+            return;
+        }
 		return;
 	}
 	if (strncmp(args[1],"+",1) == 0){
-		if ((*path) == NULL){
+		if ((*leng) == 0){
 			(* path) = (char **)calloc(1,sizeof(char*));
 			if ((*path) == NULL){
 				printf("Error in locating space for new path!\n");
