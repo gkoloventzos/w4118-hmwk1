@@ -84,10 +84,8 @@ void mypath(char **args, char ***path, int *leng){
 			return;}
         path_length = *leng;
         path_length--;
-		printf("here\n");
         i = 0;
 		do{
-            printf("i: %d\n",i);
             path_new = (*path)[i];
 			if (ppath == NULL){
 				size_t d = strlen(path_new);
@@ -103,20 +101,13 @@ void mypath(char **args, char ***path, int *leng){
 			}
 			else{
 				z = strlen(ppath);
-            printf("z: %d\n",z);
-                z = strlen(path_new);    
 				ppath = realloc(ppath,(z+strlen(path_new)+2)*sizeof(char));
-            printf("z: %d\n",z);
 			    if (ppath == NULL){
 				    printf("Error in locating space for print path.\n");
 				    return;
 			    }
                 strcat(ppath,":");
-            printf("z: %d\n",z);
                 strcat(ppath,path_new);
-            printf("z: %d\n",z);
-                
-		        printf("PATH=%s\n",ppath);
 			}
 			i++;
 		}while (i <= path_length);
@@ -128,7 +119,6 @@ void mypath(char **args, char ***path, int *leng){
 			ppath[len] = ':';
 		}*/
 		if (ppath != NULL){
-			printf("here\n");
 			len = strlen(ppath);
                 	ppath[len] = '\0';
 		}
@@ -153,13 +143,11 @@ void mypath(char **args, char ***path, int *leng){
 				printf("Error in locating space for new path!\n");
 			}
             (*leng)++;
-            printf("len: %d\n",*leng);
             return;
 		}
         (* path) = (char **)realloc((* path),((*leng)+1)*sizeof(char*));
-        (* path)[(*leng)+1] = strdup(args[2]);
+        (* path)[(*leng)] = strdup(args[2]);
         (*leng)++;
-            printf("len: %d\n",*leng);
 		return;
 	}
 	
