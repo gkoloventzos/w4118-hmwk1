@@ -20,6 +20,12 @@ int main()
 			printf("\n"); exit(0); }
 			parse(buf, args);
 			execute(args, &path,&llength);
+            if (llength == -1){
+                free(buf);
+                //free path
+                //free args
+                break;
+            }
 	}
 	return 0;
 }
@@ -54,8 +60,9 @@ st.\n");
 		}
 	}
 	if (l == 0){
+        *ll = -1;
 		//free path
-		exit(0);
+		return;
 	}
 	if (n == 0){
 		mypath(args, path, ll);
