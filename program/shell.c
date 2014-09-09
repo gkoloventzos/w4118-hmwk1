@@ -87,8 +87,8 @@ void mypath(char **args, char ***path, int *leng){
 	int i,z,path_length;
 	size_t len;
 	if (args[1] == NULL){
-		if ((*leng) == 0){
-			return;}
+		if ((*leng) == 0)
+			return;
         path_length = *leng;
         path_length--;
         i = 0;
@@ -118,16 +118,9 @@ void mypath(char **args, char ***path, int *leng){
 			}
 			i++;
 		}while (i <= path_length);
-		/*for(i=0; path_new != NULL; i++){
-			printf("here\n");
-			path_new = (*path)[i];
-			ppath = realloc(ppath,strlen(path_new)+1);
-			len = strlen(ppath);
-			ppath[len] = ':';
-		}*/
 		if (ppath != NULL){
 			len = strlen(ppath);
-                	ppath[len] = '\0';
+            ppath[len] = '\0';
 		}
 		printf("PATH=%s\n",ppath);
 		return;
