@@ -10,13 +10,13 @@ void mypath(char **args, char *** path, int *len);
 
 int main()
 {
-	char buf[2048]; char *args[128];
-    bzero(buf,1024);
+	char *buf; char *args[128];
 	char **path = NULL;
+    size_t line_length = 0;
     int llength = 0;
 	for (;;) {
 		printf("$ ");
-		if (fgets(buf, sizeof(buf), stdin) == NULL) {
+		if (getline(&buf, &line_length, stdin) == -1) {
 			printf("\n"); exit(0); }
 			parse(buf, args);
 			execute(args, &path,&llength);
