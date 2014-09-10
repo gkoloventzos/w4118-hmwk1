@@ -42,7 +42,8 @@ void parse(char *buf, char **args)
 		*args++ = buf;
 		while ((*buf != '\0') && (*buf != ' ') && (*buf != '\t') && \
 			(*buf != '\n'))
-			buf++; }
+			buf++; 
+    }
 		*--args = NULL; 
 }
 
@@ -77,30 +78,27 @@ st.\n");
 	}
     if (x == 0 && args[1] != NULL){
         if (chdir(args[1]) == -1){
-            printf("error: %s\n", strerror(errno));
+            perror("Error");
         }
         return;
     }
     for (f = 0; f <(*ll); f++){
-        printf("f:%d\n",f);
         char *exec_path;
         size_t ii = strlen((*path)[f]) + strlen(args[0]) +1;
         struct stat sb;
         exec_path = malloc(ii);
         strcat(exec_path,(*path)[f]);
-        printf("path:%s\n",exec_path);
         strcat(exec_path,args[0]);
-        printf("command:%s\n",exec_path);
         if (stat(exec_path,&sb) != -1){
             if ((pid = fork()) < 0) {
-                perror("fork");
+                perror("Error");
             }
             if (pid == 0) {
                 execvp(*args, args);
                 perror(*args);
             }
             if (wait(&status) != pid) {
-                perror("wait");
+                perror("Error");
             }
             free(exec_path);
             return;                                      
@@ -126,9 +124,9 @@ void mypath(char **args, char ***path, int *leng){
 	if (strncmp(args[1],"-",1) == 0){
         int find = -1;
         int f;
-        //char *temp;
+        char *temp;
         for (f = 0; f <(*leng); f++){
-            if (strcmp(args[2],(*path)[f]) == 0){
+            if (find < 0 && strcmp(args[2],(*path)[f]) == 0){
                 find =f;
                 if (f == (*leng) -1){
                     (*leng)--;
@@ -137,23 +135,16 @@ void mypath(char **args, char ***path, int *leng){
                 }
             }
             if (find >= 0 && f < ((*leng)-1)){
-                path_print(*path,*leng,0);
-                printf("f:%d string:%u\n",f, (*path)[f]);
-                //temp = (*path)[f];
-                //printf("after temp initia");
-                //(*path)[f]=NULL;
-                //printf("after null");
-                //free(temp);
-                //printf("after temp");
-                printf("%s\n",(*path[f+1]));
-                (*path)[f] = strdup(*path[f+1]);
+                temp = (*path)[f];
+                (*path)[f]=strdup((*path)[f+1]);
+                free(temp);
             }
         }
         if (find == -1){
             printf("Path: %s has not been added.\n",args[2]);
             return;
         }
-        free((*path)[((*leng)--)]);
+        free((*path)[((*leng)-1)]);
         (*leng)--;
 		return;
 	}
@@ -177,15 +168,14 @@ void path_print(char **path, int length, int in){
     if (in){
         printf("PATH=");
         for (i=0; i<length;i++){
-            printf("%u",path[i]);
+            printf("%s",path[i]);
             if (i < length -1)
                 printf(":");
         }
         printf("\n");
         return;
     }
-        printf("path:%u\n",path);
     for (i=0; i<length;i++){
-        printf("i:%d string:%u\n",i,path[i]);}
+        printf("i:%d string:%s\n",i,path[i]);}
 
 }
