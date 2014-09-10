@@ -51,13 +51,16 @@ void execute(char **args, char ***path, int *ll)
 	int pid, status;
 	int n = -1;
 	int l = -1;
+    int x = -1;
+    int f;
     if (args[0] == NULL){
         return;
     }
 	n = strcmp(args[0],"path");
 	l = strcmp(args[0],"exit");
+    x = strcmp(args[0],"cd");
 	if ((*path) == NULL){
-		if (n != 0 && l != 0){
+		if (n != 0 && l != 0 && x != 0){
 			printf("Error: path is null\nPlease add some path fir\
 st.\n");
 			return;
