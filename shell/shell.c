@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 #include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 void parse(char *buf, char **args);
 void execute(char **args, char *** path, int *len);
@@ -69,20 +72,44 @@ st.\n");
 		mypath(args, path, ll);
 		return;
 	}
-	if ((pid = fork()) < 0) {
-		perror("fork");
-	}
-	if (pid == 0) {
-		execvp(*args, args);
-		perror(*args);
-	}
-	if (wait(&status) != pid) {
-		perror("wait");
-	} 
+    if (x == 0 && args[1] != NULL){
+        if (chdir(args[1]) == -1){
+            printf("error: %s\n", strerror(errno));
+        }
+        return;
+    }
+    for (f = 0; f <(*ll); f++){
+        printf("f:%d\n",f);
+        char *exec_path;
+        size_t ii = strlen((*path)[f]) + strlen(args[0]) +1;
+        struct stat sb;
+        exec_path = malloc(ii);
+        strcat(exec_path,(*path)[f]);
+        printf("path:%s\n",exec_path);
+        strcat(exec_path,args[0]);
+        printf("command:%s\n",exec_path);
+        if (stat(exec_path,&sb) != -1){
+            if ((pid = fork()) < 0) {
+                perror("fork");
+            }
+            if (pid == 0) {
+                execvp(*args, args);
+                perror(*args);
+            }
+            if (wait(&status) != pid) {
+                perror("wait");
+            }
+            free(exec_path);
+            return;                                      
+        }
+        free(exec_path);    
+    }
+    return;
 }
 
 void mypath(char **args, char ***path, int *leng){
 
+    int i;
 	if (args[1] == NULL){
 		if ((*leng) == 0)
 			return;
