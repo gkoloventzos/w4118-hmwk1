@@ -7,6 +7,7 @@
 void parse(char *buf, char **args);
 void execute(char **args, char *** path, int *len);
 void mypath(char **args, char *** path, int *len);
+void path_print(char **path, int len, int in_line);
 
 int main()
 {
@@ -82,47 +83,10 @@ st.\n");
 
 void mypath(char **args, char ***path, int *leng){
 
-	char *path_new;
-	char *ppath = NULL;
-	int i,z,path_length;
-	size_t len;
 	if (args[1] == NULL){
 		if ((*leng) == 0)
 			return;
-        path_length = *leng;
-        path_length--;
-        i = 0;
-		do{
-            path_new = (*path)[i];
-			if (ppath == NULL){
-				size_t d = strlen(path_new);
-				ppath = (char*) malloc((d+2)*sizeof(char));
-			    if (ppath == NULL){
-				    printf("Error in locating space for print path.\n");
-				    return;
-			    }
-				strcpy(ppath,path_new);
-				ppath[d+1] = ':';
-				ppath[d+2] = '\0';
-    
-			}
-			else{
-				z = strlen(ppath);
-				ppath = realloc(ppath,(z+strlen(path_new)+2)*sizeof(char));
-			    if (ppath == NULL){
-				    printf("Error in locating space for print path.\n");
-				    return;
-			    }
-                strcat(ppath,":");
-                strcat(ppath,path_new);
-			}
-			i++;
-		}while (i <= path_length);
-		if (ppath != NULL){
-			len = strlen(ppath);
-            ppath[len] = '\0';
-		}
-		printf("PATH=%s\n",ppath);
+		path_print(*path,*leng,1);
 		return;
 	}
 	if (args[1] == NULL || args[2] == NULL){
@@ -156,22 +120,30 @@ void mypath(char **args, char ***path, int *leng){
 		return;
 	}
 	if (strncmp(args[1],"+",1) == 0){
-		if ((*leng) == 0){
-			(* path) = (char **)calloc(1,sizeof(char*));
-			if ((*path) == NULL){
-				printf("Error in locating space for new path!\n");
-			}
-			(*path)[0] = strdup(args[2]);
-			if ((*path)[0] == NULL){
-				printf("Error in locating space for new path!\n");
-			}
-            (*leng)++;
-            return;
-		}
         (* path) = (char **)realloc((* path),((*leng)+1)*sizeof(char*));
         (* path)[(*leng)] = strdup(args[2]);
         (*leng)++;
+        path_print(*path,*leng,0);
 		return;
 	}
 	
+}
+
+void path_print(char **path, int length, int in){
+
+    int i;
+    if (in){
+        printf("PATH=");
+        for (i=0; i<length;i++){
+            printf("%u",path[i]);
+            if (i < length -1)
+                printf(":");
+        }
+        printf("\n");
+        return;
+    }
+        printf("path:%u\n",path);
+    for (i=0; i<length;i++){
+        printf("i:%d string:%u\n",i,path[i]);}
+
 }
