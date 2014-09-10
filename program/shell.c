@@ -96,6 +96,7 @@ void mypath(char **args, char ***path, int *leng){
 	if (strncmp(args[1],"-",1) == 0){
         int find = -1;
         int f;
+        //char *temp;
         for (f = 0; f <(*leng); f++){
             if (strcmp(args[2],(*path)[f]) == 0){
                 find =f;
@@ -105,14 +106,21 @@ void mypath(char **args, char ***path, int *leng){
                     return ;
                 }
             }
-            if (find > 0 && f < ((*leng)-1)){
-                printf("f:%d\n",f);
-                free((*path)[f]);
-                (*path)[f] = strdup((*path[f+1]));
+            if (find >= 0 && f < ((*leng)-1)){
+                path_print(*path,*leng,0);
+                printf("f:%d string:%u\n",f, (*path)[f]);
+                //temp = (*path)[f];
+                //printf("after temp initia");
+                //(*path)[f]=NULL;
+                //printf("after null");
+                //free(temp);
+                //printf("after temp");
+                printf("%s\n",(*path[f+1]));
+                (*path)[f] = strdup(*path[f+1]);
             }
         }
         if (find == -1){
-            printf("Path: %s is not added.\n",args[2]);
+            printf("Path: %s has not been added.\n",args[2]);
             return;
         }
         free((*path)[((*leng)--)]);
