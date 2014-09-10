@@ -9,7 +9,7 @@ void execute(char **args, char *** path, int *len);
 void mypath(char **args, char *** path, int *len);
 void path_print(char **path, int len, int in_line);
 
-int main()
+int main(int argc, char **argv)
 {
 	char *buf; char *args[128];
 	char **path = NULL;
