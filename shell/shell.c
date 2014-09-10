@@ -158,6 +158,10 @@ void mypath(char **args, char ***path, int *leng){
 		return;
 	}
 	if (strncmp(args[1],"+",1) == 0){
+        for (i=0; i<*leng;i++){
+            if (strcmp((* path)[i],args[2]) == 0)
+                return;
+        }
         (* path) = (char **)realloc((* path),((*leng)+1)*sizeof(char*));
         (* path)[(*leng)] = strdup(args[2]);
         (*leng)++;
