@@ -161,7 +161,6 @@ void mypath(char **args, char ***path, int *leng){
         (* path) = (char **)realloc((* path),((*leng)+1)*sizeof(char*));
         (* path)[(*leng)] = strdup(args[2]);
         (*leng)++;
-        path_print(*path,*leng,0);
 		return;
 	}
 	
