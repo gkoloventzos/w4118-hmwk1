@@ -26,8 +26,6 @@ int main(int argc, char **argv)
 			execute(args, &path,&llength);
             if (llength == -1){
                 free(buf);
-                //free path
-                //free args
                 break;
             }
 	}
@@ -68,8 +66,13 @@ st.\n");
 		}
 	}
 	if (l == 0){
+        if (*ll > 0){
+            for (f = 0; f <(*ll); f++){
+                free((*path)[f]);
+            }
+            free(*path);
+        }
         *ll = -1;
-		//free path
 		return;
 	}
 	if (n == 0){
@@ -146,6 +149,8 @@ void mypath(char **args, char ***path, int *leng){
         }
         free((*path)[((*leng)-1)]);
         (*leng)--;
+        if (*leng == 0)
+            free(*path);
 		return;
 	}
 	if (strncmp(args[1],"+",1) == 0){
