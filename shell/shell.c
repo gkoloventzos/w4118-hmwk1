@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 
 void parse(char *buf, char **args);
-void execute(char ***args, char ***path, int *len);
+void execute(char ***args, char ***path, int *len, int pipes);
 void mypath(char **args, char ***path, int *len);
 void path_print(char **path, int len, int in_line);
 
@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 
 	for (;;) {
         pipes = 0;
-        all = malloc(sizeof(char ***));
+        all = calloc(1,sizeof(char ***));
 		printf("$ ");
 		if (getline(&buf, &line_length, stdin) == -1) {
 			printf("\n");
@@ -33,19 +33,31 @@ int main(int argc, char **argv)
         }
         token = strtok(buf, "|");
 	    while (token != NULL) {
-                *all = realloc(*all, (pipes+1)*sizeof(char**));
+                all = realloc(all, (pipes+1)*sizeof(char**));
 		        all[pipes] = calloc(128,sizeof(char*));
-                parse(token, all[pipes]);
+                /*The next 6 lines are due to a bug in the KR parser I am using for inputs like
+                ls -l| wc-l
+                when the pipe has no space with the command*/
+                char *token2;
+                token2 = strdup(token);
+                int gg = strlen(token2);
+                token2 = realloc(token2,gg+2);
+                token2[gg] = ' ';
+                token2[gg+1] = '\0';
+                parse(token2, all[pipes]);
 		        pipes++;
                 token = strtok(NULL, "|");
 	    }
-		execute(all, &path, &llength);
+		execute(all, &path, &llength, pipes);
 	    if (llength == -1) {
 		    free(buf);
 		    break;
 	    }
-        for (i=0;i<pipes;i++)
+        for (i=0;i<pipes;i++) {
             free(all[i]);
+        }
+/*        if (pipes == 0)
+            free(all[0]);*/
         free(all);
 	}
 	return 0;
@@ -64,25 +76,26 @@ void parse(char *buf, char **args)
 		*--args = NULL;
 }
 
-void execute(char ***args, char ***path, int *ll)
+void execute(char ***args, char ***path, int *ll, int pipes)
 {
 	int pid, status;
 	int n = -1;
 	int l = -1;
     int x = -1;
-    int f;
+    int f,p;
 
+    for (p=0;p<pipes;p++) {
     if (args[0][0] == NULL) {
-	return;
+	continue;
     }
-	n = strcmp(*args[0], "path");
-	l = strcmp(*args[0], "exit");
-    x = strcmp(*args[0], "cd");
+	n = strcmp(args[p][0], "path");
+	l = strcmp(args[p][0], "exit");
+    x = strcmp(args[p][0], "cd");
 	if ((*path) == NULL) {
 		if (n != 0 && l != 0 && x != 0) {
 			printf("Error: path is null\nPlease add some path fir\
 st.\n");
-			return;
+			continue;
 		}
 	}
 	if (l == 0) {
@@ -93,26 +106,26 @@ st.\n");
 	    free(*path);
 	}
 	*ll = -1;
-		return;
+		continue;
 	}
 	if (n == 0) {
-		mypath(*args, path, ll);
-		return;
+		mypath(args[p], path, ll);
+		continue;
 	}
-    if (x == 0 && *args[1] != NULL) {
-        if (chdir(*args[1]) == -1) {
+    if (x == 0 && args[p][1] != NULL) {
+        if (chdir(args[p][1]) == -1) {
             perror("Error");
         }
-        return;
+        continue;
     }
     for (f = 0; f < (*ll); f++) {
 	    char *exec_path;
-        size_t ii = strlen((*path)[f]) + strlen(args[0][0]) + 1;
+        size_t ii = strlen((*path)[f]) + strlen(args[p][0]) + 1;
 	    struct stat sb;
 
 	    exec_path = calloc(ii,sizeof(char));
         strcat(exec_path, (*path)[f]);
-        strcat(exec_path, args[0][0]);
+        strcat(exec_path, args[p][0]);
         if (stat(exec_path, &sb) != -1) {
             if ((pid = fork()) < 0) {
                 perror("Error");
@@ -125,11 +138,12 @@ st.\n");
                 perror("Error");
             }
             free(exec_path);
-            return;
+            continue;
 	    }
 	    free(exec_path);
     }
-    return;
+    continue;
+    }
 }
 
 void mypath(char **args, char ***path, int *leng)
