@@ -15,37 +15,38 @@ void path_print(char **path, int len, int in_line);
 int main(int argc, char **argv)
 {
 	char *buf;
-    char *args[128];
     char ***all = NULL;
     char *token;
 	char **path = NULL;
     size_t line_length = 0;
     int llength = 0;
-    int pipes = 0;
+    int pipes;
+    int i;
 
-    all = malloc(sizeof(char ***));
 	for (;;) {
+        pipes = 0;
+        all = malloc(sizeof(char ***));
 		printf("$ ");
 		if (getline(&buf, &line_length, stdin) == -1) {
-			printf("\n"); exit(0); }
-            token = strtok(buf, "|");
+			printf("\n");
+            exit(0);
+        }
+        token = strtok(buf, "|");
 	    while (token != NULL) {
-                parse(token, args);
                 *all = realloc(*all, (pipes+1)*sizeof(char**));
-		all[pipes] = args;
-		pipes++;
+		        all[pipes] = calloc(128,sizeof(char*));
+                parse(token, all[pipes]);
+		        pipes++;
                 token = strtok(NULL, "|");
 	    }
-	    if (pipes == 0) {
-                parse(buf, args);
-                *all = realloc(*all, (pipes+1)*sizeof(char**));
-		all[pipes] = args;
-	    }
-			execute(all, &path, &llength);
+		execute(all, &path, &llength);
 	    if (llength == -1) {
-		free(buf);
-		break;
+		    free(buf);
+		    break;
 	    }
+        for (i=0;i<pipes;i++)
+            free(all[i]);
+        free(all);
 	}
 	return 0;
 }
@@ -95,38 +96,38 @@ st.\n");
 		return;
 	}
 	if (n == 0) {
-		mypath(&args, path, ll);
+		mypath(*args, path, ll);
 		return;
 	}
     if (x == 0 && *args[1] != NULL) {
-	if (chdir(*args[1]) == -1) {
-	    perror("Error");
-	}
-	return;
+        if (chdir(*args[1]) == -1) {
+            perror("Error");
+        }
+        return;
     }
     for (f = 0; f < (*ll); f++) {
-	char *exec_path;
+	    char *exec_path;
         size_t ii = strlen((*path)[f]) + strlen(args[0][0]) + 1;
-	struct stat sb;
+	    struct stat sb;
 
-	exec_path = malloc(ii);
+	    exec_path = calloc(ii,sizeof(char));
         strcat(exec_path, (*path)[f]);
         strcat(exec_path, args[0][0]);
         if (stat(exec_path, &sb) != -1) {
-	    if ((pid = fork()) < 0) {
-		perror("Error");
-	    }
-	    if (pid == 0) {
-		execv(exec_path, args);
-		perror(*args);
-	    }
-	    if (wait(&status) != pid) {
-		perror("Error");
+            if ((pid = fork()) < 0) {
+                perror("Error");
+            }
+            if (pid == 0) {
+                execv(exec_path, *args);
+                perror(exec_path);
+            }
+            if (wait(&status) != pid) {
+                perror("Error");
+            }
+            free(exec_path);
+            return;
 	    }
 	    free(exec_path);
-	    return;
-	}
-	free(exec_path);
     }
     return;
 }
