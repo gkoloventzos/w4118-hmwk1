@@ -23,38 +23,51 @@ int main(int argc, char **argv)
 		pipes = 0;
 		error = 0;
 		all = calloc(1, sizeof(char ***));
-		printf("$ ");
+		printf("$");
 		if (getline(&buf, &line_length, stdin) == -1) {
 			printf("\n");
 			exit(0);
 		}
+		if (buf[strlen(buf) - 2] == '|') {
+			printf("error: dangling pipe\n");
+			continue;
+		}
 		token = strtok(buf, "|");
 		while (token != NULL) {
 			all = realloc(all, (pipes + 1) * sizeof(char **));
+			if (all == NULL) {
+				printf("error: realloc failed\n");
+				continue;
+			}
 			all[pipes] = calloc(128, sizeof(char *));
+			if (all[pipes] == NULL) {
+				printf("error: calloc failed\n");
+				continue;
+			}
 			/*The next 6 lines are due to a bug in the
 			   KR parser I am using for inputs like
 			   ls -l| wc-l
 			   when the pipe has no space with the previous
 			   command */
 			char *token2;
+			int gg = strlen(token);
 
 			token2 = strdup(token);
-			int gg = strlen(token2);
-
 			token2 = realloc(token2, gg + 2);
 			token2[gg] = ' ';
 			token2[gg + 1] = '\0';
 			parse(token2, all[pipes]);
 			pipes++;
 			if (token[gg + 1] == '|') {	/*to catch the || */
-				error = 1;	/*bash executes tha part that */
-				break;      /*works*/
+				error = 1;	/*bash executes the part that */
+				break;	/*works */
 			}
 			token = strtok(NULL, "|");
 		}
-		if (error)
+		if (error) {
+			printf("error: error with pipes\n");
 			continue;
+		}
 		execute(all, &path, &llength, pipes);
 		if (llength == -1) {
 			free(buf);
@@ -90,10 +103,22 @@ void execute(char ***args, char ***path, int *ll, int pipes)
 	pid_t *kids;
 
 	kids = calloc(pipes, sizeof(pid_t));
+	if (kids == NULL) {
+		printf("error: calloc failed\n");
+		return;
+	}
 	pip = calloc(pipes, sizeof(int *));
+	if (pip == NULL) {
+		printf("error: calloc failed\n");
+		return;
+	}
 	ret = 0;
 	for (p = 0; p < pipes; p++) {
 		pip[p] = malloc(2 * sizeof(int));
+		if (pip[p] == NULL) {
+			perror("error: ");
+			return;
+		}
 		pip[p][STDIN_FILENO] = -1;
 		pip[p][STDOUT_FILENO] = -1;
 	}
@@ -133,7 +158,7 @@ void execute(char ***args, char ***path, int *ll, int pipes)
 		}
 		if (x == 0 && args[p][1] != NULL) {
 			if (chdir(args[p][1]) == -1)
-				perror("Error");
+				perror("error");
 			continue;
 		}
 		if (x == 0 && args[p][1] == NULL) {
@@ -144,12 +169,11 @@ void execute(char ***args, char ***path, int *ll, int pipes)
 		char *exec_path;
 		struct stat sb;
 
-		printf("%s\n", args[p][0]);
 		if (args[p][0][0] != '/') {
 			for (f = 0; f < (*ll); f++) {
 				if ((*path) == NULL) {
 					printf
-					    ("Error: path is null\nPlease add some path first.\n");
+					    ("error: path is null\nPlease add some path first.\n");
 					break;
 				}
 				size_t s_l = strlen((*path)[f]);
@@ -179,29 +203,35 @@ void execute(char ***args, char ***path, int *ll, int pipes)
 		if (stat(exec_path, &sb) != -1) {
 			found = 1;
 			external = 1;
-			kids[p] = my_fork(exec_path, *args, pip, p, pipes);
+			kids[p] = my_fork(exec_path, args[p], pip, p, pipes);
 			free(exec_path);
 			continue;
 		}
+
+		if (!found) {
+			printf("error: %s is not in the path\n", args[p][0]);
+			continue;
+		}
+
 		free(exec_path);
 
-		if (!found)
-			printf("error: %s is not in the path\n", args[p][0]);
-
-		continue;
 	}
 
 	if (external) {
 		for (p = 0; p < pipes; p++) {
 			int stat, ret;
 
-			if (pip[p][STDIN_FILENO] >= 0)
-				close(pip[p][STDIN_FILENO]);
-			if (pip[p][STDOUT_FILENO] >= 0)
+			if (pip[p][STDIN_FILENO] >= 0) {
+				ret = close(pip[p][STDIN_FILENO]);
+				if (ret == -1)
+					perror("error: ");
+			}
+			if (pip[p][STDOUT_FILENO] >= 0) {
 				close(pip[p][STDOUT_FILENO]);
+				if (ret == -1)
+					perror("error: ");
+			}
 			ret = waitpid(kids[p], &stat, 0);
-			/*fprintf(stderr, "Child %d returned %d\n",
-			   m, WEXITSTATUS(stat)); */
 			if (ret == -1)
 				perror("error: ");
 		}
@@ -261,6 +291,10 @@ void mypath(char **args, char ***path, int *leng)
 		}
 		(*path) =
 		    (char **)realloc((*path), ((*leng) + 1) * sizeof(char *));
+		if (*path == NULL) {
+			printf("error: realloc failed");
+			return;
+		}
 		(*path)[(*leng)] = strdup(args[2]);
 		(*leng)++;
 		return;
@@ -274,7 +308,6 @@ void path_print(char **path, int length, int in)
 	int i;
 
 	if (in) {
-		printf("PATH=");
 		for (i = 0; i < length; i++) {
 			printf("%s", path[i]);
 			if (i < length - 1)
@@ -292,20 +325,33 @@ pid_t my_fork(char *cmd, char **args, int **pipes, int pipe_num, int all_pipes)
 {
 
 	pid_t pid;
-	int m;
+	int m, ret;
 
 	pid = fork();
 	if (pid == 0) {
-		if (pipes[pipe_num][STDIN_FILENO] >= 0)
-			dup2(pipes[pipe_num][STDIN_FILENO], STDIN_FILENO);
-		if (pipes[pipe_num][STDOUT_FILENO] >= 0)
-			dup2(pipes[pipe_num][STDOUT_FILENO], STDOUT_FILENO);
+		if (pipes[pipe_num][STDIN_FILENO] >= 0) {
+			ret = dup2(pipes[pipe_num][STDIN_FILENO], STDIN_FILENO);
+			if (ret == -1)
+				perror("error: ");
+		}
+		if (pipes[pipe_num][STDOUT_FILENO] >= 0) {
+			ret =
+			    dup2(pipes[pipe_num][STDOUT_FILENO], STDOUT_FILENO);
+			if (ret == -1)
+				perror("error: ");
+		}
 
 		for (m = 0; m < all_pipes; m++) {
-			if (pipes[m][STDIN_FILENO] >= 0)
-				close(pipes[m][STDIN_FILENO]);
-			if (pipes[m][STDOUT_FILENO] >= 0)
-				close(pipes[m][STDOUT_FILENO]);
+			if (pipes[m][STDIN_FILENO] >= 0) {
+				ret = close(pipes[m][STDIN_FILENO]);
+				if (ret == -1)
+					perror("error: ");
+			}
+			if (pipes[m][STDOUT_FILENO] >= 0) {
+				ret = close(pipes[m][STDOUT_FILENO]);
+				if (ret == -1)
+					perror("error: ");
+			}
 		}
 
 		execv(cmd, args);
