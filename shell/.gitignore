@@ -1,4 +1,5 @@
 *.o
 w4118_sh
 *.swp
-*.check
+*.py
+*.pl
