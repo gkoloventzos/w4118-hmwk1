@@ -38,8 +38,8 @@ main -> 5 -> 4 -> 3 -> 2 -> 1 -> 0
 The output of this command will be the listing of the contents of the current
 directory and it will close (if you do it in your machine you will probably 
 not see anything as the shell will close immediately). Try it on a machine that
-you are logged in through ssh. It will print the cnotents and the connection
-will close. This happens as the exwc overwrites the current program (your open
+you are logged in through ssh. It will print the contents and the connection
+will close. This happens as the exec overwrites the current program (your open
 shell for connection) with ls. It will print the contents and then it will end.
 This will end also the connection with the pc.
 
@@ -54,4 +54,16 @@ This is a fork bomb. It will start creating processes until it cannot create
 more (the limit of processes the user can create is reached). It will freeze
 your computer and probably your cat will die.
 
+3.2
+
+Most of system calls are returning an error value. For exec a common error
+should be that it could not find the program to execute. So yes exec can return
+an error and it should. In general we are not looking if it returned -1 as if
+it is still in that process an error has occurred and we just do perror.
+
+3.1
+
+Most of system calls are returning an error value. For fork an error that can
+occur is to reach the limit of the users open processes. So yes we must check
+if the fork returns -1 and handle the error.
 
