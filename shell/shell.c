@@ -116,7 +116,7 @@ void execute(char ***args, char ***path, int *ll, int pipes)
 	for (p = 0; p < pipes; p++) {
 		pip[p] = malloc(2 * sizeof(int));
 		if (pip[p] == NULL) {
-			perror("error: ");
+			perror("error ");
 			return;
 		}
 		pip[p][STDIN_FILENO] = -1;
@@ -127,7 +127,7 @@ void execute(char ***args, char ***path, int *ll, int pipes)
 
 		ret = pipe(temp);
 		if (ret == -1) {
-			perror("error: ");
+			perror("error ");
 			break;
 		}
 		pip[p][STDOUT_FILENO] = temp[STDOUT_FILENO];
@@ -223,17 +223,17 @@ void execute(char ***args, char ***path, int *ll, int pipes)
 		if (pip[p][STDIN_FILENO] >= 0) {
 			ret = close(pip[p][STDIN_FILENO]);
 			if (ret == -1)
-				perror("error: ");
+				perror("error ");
 		}
 		if (pip[p][STDOUT_FILENO] >= 0) {
 			close(pip[p][STDOUT_FILENO]);
 			if (ret == -1)
-				perror("error: ");
+				perror("error ");
 		}
 	        if (external) {
 			ret = waitpid(kids[p], &stat, 0);
 			if (ret == -1)
-				perror("error: ");
+				perror("error ");
 		}
 	}
 	free(kids);
@@ -334,30 +334,30 @@ pid_t my_fork(char *cmd, char **args, int **pipes, int pipe_num, int all_pipes)
 	if (pipes[pipe_num][STDIN_FILENO] >= 0) {
 		ret = dup2(pipes[pipe_num][STDIN_FILENO], STDIN_FILENO);
 		if (ret == -1)
-			perror("error: ");
+			perror("error ");
 	}
 	if (pipes[pipe_num][STDOUT_FILENO] >= 0) {
 		ret =
 			dup2(pipes[pipe_num][STDOUT_FILENO], STDOUT_FILENO);
 		if (ret == -1)
-			perror("error: ");
+			perror("error ");
 	}
 
 	for (m = 0; m < all_pipes; m++) {
 		if (pipes[m][STDIN_FILENO] >= 0) {
 			ret = close(pipes[m][STDIN_FILENO]);
 			if (ret == -1)
-				perror("error: ");
+				perror("error ");
 		}
 		if (pipes[m][STDOUT_FILENO] >= 0) {
 			ret = close(pipes[m][STDOUT_FILENO]);
 			if (ret == -1)
-				perror("error: ");
+				perror("error ");
 		}
 	}
 
 	execv(cmd, args);
-	perror("error:");
+	perror("error");
 	return -1;
 
 }
