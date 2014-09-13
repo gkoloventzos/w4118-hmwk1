@@ -1,4 +1,5 @@
 3.10
+
 The output of the first program will be
 6 (child)
 6 (father)
@@ -24,3 +25,15 @@ another 5 to its x value. At the end we will have this result.
                       x = 10    x = 15
 
 3.8
+
+The following program creates  processes.
+main -> 5 -> 4 -> 3 -> 2 -> 1 -> 0
+        |
+        4 -> 3 -> 2 -> 1 -> 0
+        
+
+
+
+
+
+

@@ -217,20 +217,20 @@ void execute(char ***args, char ***path, int *ll, int pipes)
 
 	}
 
-	if (external) {
-		for (p = 0; p < pipes; p++) {
-			int stat, ret;
+	for (p = 0; p < pipes; p++) {
+		int stat, ret;
 
-			if (pip[p][STDIN_FILENO] >= 0) {
-				ret = close(pip[p][STDIN_FILENO]);
-				if (ret == -1)
-					perror("error: ");
-			}
-			if (pip[p][STDOUT_FILENO] >= 0) {
-				close(pip[p][STDOUT_FILENO]);
-				if (ret == -1)
-					perror("error: ");
-			}
+		if (pip[p][STDIN_FILENO] >= 0) {
+			ret = close(pip[p][STDIN_FILENO]);
+			if (ret == -1)
+				perror("error: ");
+		}
+		if (pip[p][STDOUT_FILENO] >= 0) {
+			close(pip[p][STDOUT_FILENO]);
+			if (ret == -1)
+				perror("error: ");
+		}
+	        if (external) {
 			ret = waitpid(kids[p], &stat, 0);
 			if (ret == -1)
 				perror("error: ");
