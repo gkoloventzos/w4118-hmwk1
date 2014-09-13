@@ -59,8 +59,8 @@ int main(int argc, char **argv)
 			parse(token2, all[pipes]);
 			pipes++;
 			if (token[gg + 1] == '|') {	/*to catch the || */
-				error = 1;	/*bash executes the part that */
-				break;	/*works */
+				error = 1;	/*bash executes the part */
+				break;	/*that works */
 			}
 			token = strtok(NULL, "|");
 		}
@@ -328,36 +328,36 @@ pid_t my_fork(char *cmd, char **args, int **pipes, int pipe_num, int all_pipes)
 	int m, ret;
 
 	pid = fork();
-	if (pid == 0) {
-		if (pipes[pipe_num][STDIN_FILENO] >= 0) {
-			ret = dup2(pipes[pipe_num][STDIN_FILENO], STDIN_FILENO);
-			if (ret == -1)
-				perror("error: ");
-		}
-		if (pipes[pipe_num][STDOUT_FILENO] >= 0) {
-			ret =
-			    dup2(pipes[pipe_num][STDOUT_FILENO], STDOUT_FILENO);
-			if (ret == -1)
-				perror("error: ");
-		}
+	if (pid != 0)
+        return pid;
 
-		for (m = 0; m < all_pipes; m++) {
-			if (pipes[m][STDIN_FILENO] >= 0) {
-				ret = close(pipes[m][STDIN_FILENO]);
-				if (ret == -1)
-					perror("error: ");
-			}
-			if (pipes[m][STDOUT_FILENO] >= 0) {
-				ret = close(pipes[m][STDOUT_FILENO]);
-				if (ret == -1)
-					perror("error: ");
-			}
-		}
-
-		execv(cmd, args);
-		perror("error:");
-		return -1;
+	if (pipes[pipe_num][STDIN_FILENO] >= 0) {
+		ret = dup2(pipes[pipe_num][STDIN_FILENO], STDIN_FILENO);
+		if (ret == -1)
+			perror("error: ");
+	}
+	if (pipes[pipe_num][STDOUT_FILENO] >= 0) {
+		ret =
+			dup2(pipes[pipe_num][STDOUT_FILENO], STDOUT_FILENO);
+		if (ret == -1)
+			perror("error: ");
 	}
 
-	return pid;
+	for (m = 0; m < all_pipes; m++) {
+		if (pipes[m][STDIN_FILENO] >= 0) {
+			ret = close(pipes[m][STDIN_FILENO]);
+			if (ret == -1)
+				perror("error: ");
+		}
+		if (pipes[m][STDOUT_FILENO] >= 0) {
+			ret = close(pipes[m][STDOUT_FILENO]);
+			if (ret == -1)
+				perror("error: ");
+		}
+	}
+
+	execv(cmd, args);
+	perror("error:");
+	return -1;
+
 }
