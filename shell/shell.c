@@ -11,7 +11,7 @@ void parse(char *buf, char **args);
 void execute(char ***args, char ***path, int *len, int pipes);
 void mypath(char **args, char ***path, int *len);
 void path_print(char **path, int len, int in_line);
-pid_t my_fork(char *cmd, char** args, int **pipes, int pipe_num, int allpipes);
+pid_t my_fork(char *cmd, char **args, int **pipes, int pipe_num, int allpipes);
 
 int main(int argc, char **argv)
 {
@@ -22,12 +22,12 @@ int main(int argc, char **argv)
     size_t line_length = 0;
     int llength = 0;
     int pipes;
-    int i,error;
+    int i, error;
 
 	for (;;) {
         pipes = 0;
         error = 0;
-        all = calloc(1,sizeof(char ***));
+        all = calloc(1, sizeof(char ***));
 		printf("$ ");
 		if (getline(&buf, &line_length, stdin) == -1) {
 			printf("\n");
@@ -35,16 +35,18 @@ int main(int argc, char **argv)
         }
         token = strtok(buf, "|");
 	    while (token != NULL) {
-                all = realloc(all, (pipes+1)*sizeof(char**));
-		        all[pipes] = calloc(128,sizeof(char*));
+                all = realloc(all, (pipes+1)*sizeof(char **));
+		        all[pipes] = calloc(128, sizeof(char *));
                 /*The next 6 lines are due to a bug in the
                 KR parser I am using for inputs like
                 ls -l| wc-l
                 when the pipe has no space with the previous command*/
                 char *token2;
+
                 token2 = strdup(token);
                 int gg = strlen(token2);
-                token2 = realloc(token2,gg+2);
+
+                token2 = realloc(token2, gg+2);
                 token2[gg] = ' ';
                 token2[gg+1] = '\0';
                 parse(token2, all[pipes]);
@@ -62,9 +64,8 @@ int main(int argc, char **argv)
 		    free(buf);
 		    break;
 	    }
-        for (i=0;i<pipes;i++) {
+        for (i = 0; i < pipes; i++)
             free(all[i]);
-        }
         free(all);
 	}
 	return 0;
@@ -92,27 +93,27 @@ void execute(char ***args, char ***path, int *ll, int pipes)
     int **pip;
     pid_t *kids;
 
-    kids = calloc(pipes,sizeof(pid_t));
-    pip = calloc(pipes,sizeof(int*));
+    kids = calloc(pipes, sizeof(pid_t));
+    pip = calloc(pipes, sizeof(int *));
     ret = 0;
-    for (p=0;p<pipes;p++) {
+    for (p = 0; p < pipes; p++) {
         pip[p] = malloc(2*sizeof(int));
-        pip[p][STDIN_FILENO]=-1;
-        pip[p][STDOUT_FILENO]=-1;
+        pip[p][STDIN_FILENO] = -1;
+        pip[p][STDOUT_FILENO] = -1;
     }
-    for (p=0;p<pipes-1;p++) {
+    for (p = 0; p < pipes-1; p++) {
         int temp[2];
         ret = pipe(temp);
-        if (ret == -1){
+        if (ret == -1) {
             perror("error: ");
             break;
         }
-        pip[p][STDOUT_FILENO]=temp[STDOUT_FILENO]; // Process N writes to the pipe
-        pip[p+1][STDIN_FILENO]=temp[STDIN_FILENO]; // Process N+1 reads from the pipe
+        pip[p][STDOUT_FILENO] = temp[STDOUT_FILENO]; /* Process N writes to the pipe*/
+        pip[p+1][STDIN_FILENO] = temp[STDIN_FILENO]; /* Process N+1 reads from the pipe*/
     }
     if (ret == -1)
         return;
-    for (p=0;p<pipes;p++) {
+    for (p = 0; p < pipes; p++) {
         external = 0;
         if (args[p][0] == NULL)
             break;
@@ -122,9 +123,8 @@ void execute(char ***args, char ***path, int *ll, int pipes)
         x = strcmp(args[p][0], "cd");
         if (l == 0) {
             if (*ll > 0) {
-                for (f = 0; f < (*ll); f++) {
+                for (f = 0; f < (*ll); f++)
                     free((*path)[f]);
-                }
                 free(*path);
             }
             *ll = -1;
@@ -135,9 +135,8 @@ void execute(char ***args, char ***path, int *ll, int pipes)
             continue;
         }
         if (x == 0 && args[p][1] != NULL) {
-            if (chdir(args[p][1]) == -1) {
+            if (chdir(args[p][1]) == -1)
                 perror("Error");
-            }
             continue;
         }
         if (x == 0 && args[p][1] == NULL) {
@@ -147,7 +146,7 @@ void execute(char ***args, char ***path, int *ll, int pipes)
         int found = 0;
         char *exec_path;
         struct stat sb;
-        printf("%s\n",args[p][0]);
+        printf("%s\n", args[p][0]);
         if (args[p][0][0] != '/') {
             for (f = 0; f < (*ll); f++) {
                 if ((*path) == NULL) {
@@ -157,20 +156,20 @@ void execute(char ***args, char ***path, int *ll, int pipes)
                 size_t s_l = strlen((*path)[f]);
                 if ((*path)[f][s_l] != '/'){
                     size_t ii = strlen((*path)[f]) + strlen(args[p][0]) + 2;
-                    exec_path = calloc(ii,sizeof(char));
+
+                    exec_path = calloc(ii, sizeof(char));
                     strcat(exec_path, (*path)[f]);
                     strcat(exec_path, "/");
                     strcat(exec_path, args[p][0]);
-                }
-                else{
+                }else{
                     size_t ii = strlen((*path)[f]) + strlen(args[p][0]) + 1;
-                    exec_path = calloc(ii,sizeof(char));
+
+                    exec_path = calloc(ii, sizeof(char));
                     strcat(exec_path, (*path)[f]);
                     strcat(exec_path, args[p][0]);
                 }
             }
-        }
-            else {
+        }else {
                 exec_path = strdup(args[p][0]);
             }
             if (stat(exec_path, &sb) != -1) {
@@ -181,19 +180,20 @@ void execute(char ***args, char ***path, int *ll, int pipes)
                 continue;
             }
             free(exec_path);
- 
-        if (! found)
-            printf("error: %s is not in the path\n",args[p][0]);
+
+        if (!found)
+            printf("error: %s is not in the path\n", args[p][0]);
  
         continue;
     }
 
-    if (external){
-        for(p=0; p<pipes; p++) {
+    if (external) {
+        for (p = 0; p < pipes; p++) {
             int stat, ret;
-            if(pip[p][STDIN_FILENO] >= 0)
+
+            if (pip[p][STDIN_FILENO] >= 0)
                 close(pip[p][STDIN_FILENO]);
-            if(pip[p][STDOUT_FILENO] >= 0)
+            if (pip[p][STDOUT_FILENO] >= 0)
                 close(pip[p][STDOUT_FILENO]);
                 ret = waitpid(kids[p], &stat, 0);
                 /*fprintf(stderr, "Child %d returned %d\n",
@@ -251,11 +251,10 @@ void mypath(char **args, char ***path, int *leng)
 	}
 	if (strncmp(args[1], "+", 1) == 0) {
         for (i = 0; i <  *leng; i++) {
-            if (strcmp((*path)[i], args[2]) == 0) {
+            if (strcmp((*path)[i], args[2]) == 0)
 		        return;
-	        }
         }
-        (*path) = (char **)realloc((*path), ((*leng)+1)*sizeof(char*));
+        (*path) = (char **)realloc((*path), ((*leng)+1)*sizeof(char *));
         (*path)[(*leng)] = strdup(args[2]);
 	    (*leng)++;
 		return;
@@ -278,28 +277,29 @@ void path_print(char **path, int length, int in)
 	printf("\n");
 	return;
     }
-    for (i = 0; i < length; i++) {
-        printf("i:%d string:%s\n", i, path[i]); }
+    for (i = 0; i < length; i++)
+        printf("i:%d string:%s\n", i, path[i]);
 
 }
 
-pid_t my_fork(char * cmd, char **args, int **pipes, int pipe_num, int all_pipes)
+pid_t my_fork(char *cmd, char **args, int **pipes, int pipe_num, int all_pipes)
 {
 
     pid_t pid;
+
     pid = fork();
-    if(pid == 0)
-    {
+    if (pid == 0) {
         int m;
+        if (pipes[pipe_num][STDIN_FILENO] >= 0)
+            dup2(pipes[pipe_num][STDIN_FILENO], STDIN_FILENO);
+        if (pipes[pipe_num][STDOUT_FILENO] >= 0)
+            dup2(pipes[pipe_num][STDOUT_FILENO], STDOUT_FILENO);
 
-        if(pipes[pipe_num][STDIN_FILENO] >= 0) dup2(pipes[pipe_num][STDIN_FILENO], STDIN_FILENO); // FD 0
-        if(pipes[pipe_num][STDOUT_FILENO] >= 0) dup2(pipes[pipe_num][STDOUT_FILENO], STDOUT_FILENO); // FD 1
-
-        // Close all pipes
-        for(m=0; m<all_pipes; m++)
-        {
-            if(pipes[m][STDIN_FILENO] >= 0) close(pipes[m][STDIN_FILENO]);
-            if(pipes[m][STDOUT_FILENO] >= 0) close(pipes[m][STDOUT_FILENO]);
+        for (m = 0; m < all_pipes; m++) {
+            if (pipes[m][STDIN_FILENO] >= 0)
+                close(pipes[m][STDIN_FILENO]);
+            if (pipes[m][STDOUT_FILENO] >= 0)
+                close(pipes[m][STDOUT_FILENO]);
         }
 
         execv(cmd, args);
@@ -307,5 +307,5 @@ pid_t my_fork(char * cmd, char **args, int **pipes, int pipe_num, int all_pipes)
         return -1;
     }
 
-    return(pid);
+    return pid;
 }
