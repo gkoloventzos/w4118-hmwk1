@@ -1,1 +1,26 @@
-test
+3.10
+The output of the first program will be
+6 (child)
+6 (father)
+
+As the father will be waiting for the child to terminate, the child will
+print the val (first 6) and then the father will continue and print also
+the val (second 6).
+
+3.9
+
+As the father will produce 2 children, we will have 3 copies of the variable.
+As the first child will enter the first if the value of its x will be 10. After
+this if this child will terminate. Then the father will continue in the else
+part and will fork another child. Then both 2nd children and father will add 10
+in their x values. But only the father will succeed in the second if and add
+another 5 to its x value. At the end we will have this result.
+                        (Father)
+                         x = 20
+                           /\
+                         /    \
+                        /       \
+                    1st Child  2nd child
+                      x = 10    x = 15
+
+3.8
