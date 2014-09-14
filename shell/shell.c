@@ -234,14 +234,8 @@ void mypath(char **args, char ***path, int *leng)
 		char *temp;
 
 		for (f = 0; f < (*leng); f++) {
-			if (find < 0 && strcmp(args[2], (*path)[f]) == 0) {
+			if (find < 0 && strcmp(args[2], (*path)[f]) == 0)
 				find = f;
-				if (f == (*leng) - 1) {
-					(*leng)--;
-					free((*path)[f]);
-					return;
-				}
-			}
 			if (find >= 0 && f < ((*leng) - 1)) {
 				temp = (*path)[f];
 				(*path)[f] = strdup((*path)[f + 1]);
@@ -273,7 +267,8 @@ void mypath(char **args, char ***path, int *leng)
 		(*leng)++;
 		return;
 	}
-
+        /*Any other symbol*/
+        printf("error: Use of path: path [+|- absolute path]\n");
 }
 
 void path_print(char **path, int length, int in)
