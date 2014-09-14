@@ -170,33 +170,7 @@ void execute(char ***args, char ***path, int *ll, int pipes)
 		struct stat sb;
 
 		if (args[p][0][0] != '/') {
-			for (f = 0; f < (*ll); f++) {
-				if ((*path) == NULL) {
-					printf
-					    ("error: path is null\nPlease add some path first.\n");
-					break;
-				}
-				size_t s_l = strlen((*path)[f]);
-
-				if ((*path)[f][s_l] != '/') {
-					size_t ii =
-					    strlen((*path)[f]) +
-					    strlen(args[p][0]) + 2;
-
-					exec_path = calloc(ii, sizeof(char));
-					strcat(exec_path, (*path)[f]);
-					strcat(exec_path, "/");
-					strcat(exec_path, args[p][0]);
-				} else {
-					size_t ii =
-					    strlen((*path)[f]) +
-					    strlen(args[p][0]) + 1;
-
-					exec_path = calloc(ii, sizeof(char));
-					strcat(exec_path, (*path)[f]);
-					strcat(exec_path, args[p][0]);
-				}
-			}
+			exec_path = create_path(args[p][0], path, ll);
 		} else {
 			exec_path = strdup(args[p][0]);
 		}
@@ -230,7 +204,7 @@ void execute(char ***args, char ***path, int *ll, int pipes)
 			if (ret == -1)
 				perror("error ");
 		}
-	        if (external) {
+		if (external) {
 			ret = waitpid(kids[p], &stat, 0);
 			if (ret == -1)
 				perror("error ");
@@ -329,7 +303,7 @@ pid_t my_fork(char *cmd, char **args, int **pipes, int pipe_num, int all_pipes)
 
 	pid = fork();
 	if (pid != 0)
-        return pid;
+		return pid;
 
 	if (pipes[pipe_num][STDIN_FILENO] >= 0) {
 		ret = dup2(pipes[pipe_num][STDIN_FILENO], STDIN_FILENO);
@@ -337,8 +311,7 @@ pid_t my_fork(char *cmd, char **args, int **pipes, int pipe_num, int all_pipes)
 			perror("error ");
 	}
 	if (pipes[pipe_num][STDOUT_FILENO] >= 0) {
-		ret =
-			dup2(pipes[pipe_num][STDOUT_FILENO], STDOUT_FILENO);
+		ret = dup2(pipes[pipe_num][STDOUT_FILENO], STDOUT_FILENO);
 		if (ret == -1)
 			perror("error ");
 	}
@@ -360,4 +333,35 @@ pid_t my_fork(char *cmd, char **args, int **pipes, int pipe_num, int all_pipes)
 	perror("error");
 	return -1;
 
+}
+
+char *create_path(char *args, char ***path, int *ll)
+{
+	int f;
+	char *exec_path;
+
+	for (f = 0; f < (*ll); f++) {
+		if ((*path) == NULL) {
+			printf
+			    ("error: path is null\nPlease add some path first.\n");
+			break;
+		}
+		size_t s_l = strlen((*path)[f]);
+
+		if ((*path)[f][s_l] != '/') {
+			size_t ii = strlen((*path)[f]) + strlen(args) + 2;
+
+			exec_path = calloc(ii, sizeof(char));
+			strcat(exec_path, (*path)[f]);
+			strcat(exec_path, "/");
+			strcat(exec_path, args);
+		} else {
+			size_t ii = strlen((*path)[f]) + strlen(args) + 1;
+
+			exec_path = calloc(ii, sizeof(char));
+			strcat(exec_path, (*path)[f]);
+			strcat(exec_path, args);
+		}
+	}
+	return exec_path;
 }
