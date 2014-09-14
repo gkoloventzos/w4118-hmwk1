@@ -16,6 +16,7 @@ this if this child will terminate. Then the father will continue in the else
 part and will fork another child. Then both 2nd children and father will add 10
 in their x values. But only the father will succeed in the second if and add
 another 5 to its x value. At the end we will have this result.
+
                         (Father)
                          x = 20
                            /\
@@ -26,12 +27,11 @@ another 5 to its x value. At the end we will have this result.
 
 3.8
 
-The following program creates  processes.
-main -> 5 -> 4 -> 3 -> 2 -> 1 -> 0
-        |
-        4 -> 3 -> 2 -> 1 -> 0
-        
-
+The following program creates 31 processes.
+The problem starts when you are not realizing that every forkthem spawns only 
+one new process.
+With this in mind the 5 will create one process. Every 4 will create another.
+Every 3 will create another, etc. So it goes as 2^0+2^1+2^2+2^3+2^4 = 31
 
 3.7
 
@@ -64,6 +64,27 @@ it is still in that process an error has occurred and we just do perror.
 3.1
 
 Most of system calls are returning an error value. For fork an error that can
-occur is to reach the limit of the users open processes. So yes we must check
-if the fork returns -1 and handle the error.
+occur is to reach the limit of the users open processes. So fork it should
+return an error and we must check if the fork returns -1 and handle the error.
 
+1.8
+
+My system will be designed as the system handles the system calls. I would give
+him the resources it needs but my system will have the last line when the
+resource was about to use. If something is not allowed then it would fail 
+gracefully in order not to break the application of os.
+
+1.13
+
+In my point of view (I am using ubuntu 12.04) I would like to priorize in 
+reliability, security, performance, adoption, portability. I want my system to
+be reliable. Not to crash in the middle of answering this question and lose all
+my unsaved data. And if this happens (and it happened as my pc froze when I
+started the vmware...) to have a way to restore part of my answer (yeah .swp of
+ vim). Then in security as it will be a shame to found out that my exersize was
+download from the rest of the class. Also performance is a great aspect 
+especially for gamers and serious art majors when using this complex program
+for editing photos, videos or bluerpints. Adoption will come handy for creating
+all of this great programs to use. Last but not least the portability. It is a
+shame that especially with linux we have major problems with the graphics 
+driver (Linus has said it all regarding a specific brand...).
