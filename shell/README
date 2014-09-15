@@ -1,0 +1,13 @@
+Assumptions
+I am not handling the ./ commands as the user can just put the working directory
+in the path.
+
+I can handle up to 128 arguments per command (line 42).
+
+My parser is from a previous exercise and someone told told that is from either
+Kernighan or Richie from a book. I have searched the K&R book but it is not there.
+
+I also used some of the man pages of exec, pipe, malloc, fork, wait, strtok, strdup,
+free and the rest of the gang.
+
+Some wikipedia and always the stackoverflow for some pipe ideas.
