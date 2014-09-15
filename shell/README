@@ -11,3 +11,8 @@ I also used some of the man pages of exec, pipe, malloc, fork, wait, strtok, str
 free and the rest of the gang.
 
 Some wikipedia and always the stackoverflow for some pipe ideas.
+
+In my computer I had problems running the VM so I am not sure if it will have
+any problem (When the vm was created the whole machine got stuck both vm and 
+phusical). It runs smoothly in my ubuntu 12.04 machine and probably I do not have
+the correct video driver for the vm to run.
