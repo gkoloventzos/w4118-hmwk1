@@ -17,21 +17,24 @@ int main(int argc, char **argv)
 	size_t line_length = 0;
 	int llength = 0;
 	int pipes;
-	int i, error;
+	int i, dd, error;
 
 	for (;;) {
 		pipes = 0;
 		error = 0;
+		i = 0;
 		all = calloc(1, sizeof(char ***));
 		printf("$");
 		if (getline(&buf, &line_length, stdin) == -1) {
 			printf("\n");
 			exit(0);
 		}
-		if (buf[strlen(buf) - 2] == '|') {
+		dd = strlen(buf);
+		if (buf[dd - 2] == '|') {
 			printf("error: dangling pipe\n");
 			continue;
 		}
+		char *buf2 = strdup(buf);
 		token = strtok(buf, "|");
 		while (token != NULL) {
 			all = realloc(all, (pipes + 1) * sizeof(char **));
@@ -52,17 +55,20 @@ int main(int argc, char **argv)
 			char *token2;
 			int gg = strlen(token);
 
+			i += gg;
 			token2 = strdup(token);
 			token2 = realloc(token2, gg + 2);
 			token2[gg] = ' ';
 			token2[gg + 1] = '\0';
 			parse(token2, all[pipes]);
 			pipes++;
-			if (token[gg + 1] == '|') {	/*to catch the || */
+			int z = dagling_pipe(buf2, i, dd);
+			if (z) {	/*to catch the || */
 				error = 1;	/*bash executes the part */
 				break;	/*that works */
 			}
 			token = strtok(NULL, "|");
+			i++;
 		}
 		if (error) {
 			printf("error: error with pipes\n");
@@ -76,6 +82,23 @@ int main(int argc, char **argv)
 		for (i = 0; i < pipes; i++)
 			free(all[i]);
 		free(all);
+		free(buf2);
+	}
+	return 0;
+}
+
+int dagling_pipe(char *buf, int i, int ll)
+{
+
+	int z;
+	for (z = i + 1; z < ll; z++) {
+		if (buf[z] == '|') {
+			return 1;
+		} else if ((buf[z] != ' ') && (buf[z] != '\t')) {
+			return 0;
+		} else {
+			continue;
+		}
 	}
 	return 0;
 }
@@ -267,8 +290,8 @@ void mypath(char **args, char ***path, int *leng)
 		(*leng)++;
 		return;
 	}
-        /*Any other symbol*/
-        printf("error: Use of path: path [+|- absolute path]\n");
+	/*Any other symbol */
+	printf("error: Use of path: path [+|- absolute path]\n");
 }
 
 void path_print(char **path, int length, int in)
