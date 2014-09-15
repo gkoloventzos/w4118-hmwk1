@@ -8,6 +8,9 @@ As the father will be waiting for the child to terminate, the child will
 print the val (first 6) and then the father will continue and print also
 the val (second 6).
 
+The output of the second program will be a single 6 as the child will exit
+before printing.
+
 3.9
 
 As the father will produce 2 children, we will have 3 copies of the variable.
@@ -27,11 +30,12 @@ another 5 to its x value. At the end we will have this result.
 
 3.8
 
-The following program creates 31 processes.
+The following program creates 32 processes.
 The problem starts when you are not realizing that every forkthem spawns only 
 one new process.
 With this in mind the 5 will create one process. Every 4 will create another.
-Every 3 will create another, etc. So it goes as 2^0+2^1+2^2+2^3+2^4 = 31
+Every 3 will create another, etc. So it goes as 2^0+2^1+2^2+2^3+2^4 = 31.
+And if we add the main process is creating children is 32.
 
 3.7
 
