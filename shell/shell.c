@@ -35,6 +35,7 @@ int main(int argc, char **argv)
 			continue;
 		}
 		char *buf2 = strdup(buf);
+
 		token = strtok(buf, "|");
 		while (token != NULL) {
 			all = realloc(all, (pipes + 1) * sizeof(char **));
@@ -63,6 +64,7 @@ int main(int argc, char **argv)
 			parse(token2, all[pipes]);
 			pipes++;
 			int z = dagling_pipe(buf2, i, dd);
+
 			if (z) {	/*to catch the || */
 				error = 1;	/*bash executes the part */
 				break;	/*that works */
@@ -91,14 +93,13 @@ int dagling_pipe(char *buf, int i, int ll)
 {
 
 	int z;
+
 	for (z = i + 1; z < ll; z++) {
-		if (buf[z] == '|') {
+		if (buf[z] == '|')
 			return 1;
-		} else if ((buf[z] != ' ') && (buf[z] != '\t')) {
+		if ((buf[z] != ' ') && (buf[z] != '\t'))
 			return 0;
-		} else {
-			continue;
-		}
+		continue;
 	}
 	return 0;
 }
@@ -192,11 +193,10 @@ void execute(char ***args, char ***path, int *ll, int pipes)
 		char *exec_path;
 		struct stat sb;
 
-		if (args[p][0][0] != '/') {
+		if (args[p][0][0] != '/')
 			exec_path = create_path(args[p][0], path, ll);
-		} else {
+		else
 			exec_path = strdup(args[p][0]);
-		}
 		if (stat(exec_path, &sb) != -1) {
 			found = 1;
 			external = 1;
